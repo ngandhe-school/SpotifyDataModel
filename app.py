@@ -42,8 +42,15 @@ def load_data(uploaded_files):
 
 
 def clean_data(df):
-    """Cleans the raw streaming data."""
+    """Cleans the raw streaming data and converts timezone from UTC to US/Central."""
     df['endTime'] = pd.to_datetime(df['endTime'])
+    
+    # Localize the timezone-naive UTC timestamps to 'UTC'
+    df['endTime'] = df['endTime'].dt.tz_localize('UTC')
+    
+    # Convert the UTC timestamps to 'US/Central' (CST/CDT)
+    df['endTime'] = df['endTime'].dt.tz_convert('US/Central')
+    
     df_filtered = df[df['msPlayed'] > 30000].copy()
     df_filtered['hour'] = df_filtered['endTime'].dt.hour
     df_filtered['day_of_week'] = df_filtered['endTime'].dt.day_name()
